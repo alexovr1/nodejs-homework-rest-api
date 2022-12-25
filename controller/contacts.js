@@ -1,6 +1,6 @@
 const Contact = require('../models/contact');
 const {
-    // schemaCreateContact,
+    schemaCreateContact,
     schemaUpdateContact,
     schemaUpdateStatusContact
 } = require("../schema/validateSchema");
@@ -39,15 +39,15 @@ const getContactById = async (req, res, next) => {
 
 const addContact = async (req, res, next) => {
     const { name, email, phone } = req.body;
-    // const { error, value } = schemaCreateContact.validate({ name, phone, email, favorite })
-    // console.log(error);
+    const { error, value } = schemaCreateContact.validate({ name, phone, email })
+    console.log(error);
 
-    // if (error) {
-    //     return res.status(400).json({ message: "missing required name field" });
-    // }
+    if (error) {
+        return res.status(400).json({ message: "missing required name field" });
+    }
 
     try {
-        const newContact = await Contact.create({ name, email, phone })
+        const newContact = await Contact.create(value)
         res.status(201).json(newContact);
     } catch (error) {
         console.error(error);
