@@ -40,7 +40,6 @@ const getContactById = async (req, res, next) => {
 const addContact = async (req, res, next) => {
     const { name, email, phone } = req.body;
     const { error, value } = schemaCreateContact.validate({ name, phone, email })
-    console.log(error);
 
     if (error) {
         return res.status(400).json({ message: "missing required name field" });
