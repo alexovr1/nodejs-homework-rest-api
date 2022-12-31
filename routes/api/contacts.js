@@ -1,11 +1,13 @@
 const route = require("express").Router();
 const { getAll, getContactById, addContact, removeContact, updateContact, updateStatusContact } = require("../../controller/contacts");
+const authenticate = require("../../middlewares/authenticate")
 
-route.get('/', getAll);
-route.post('/', addContact);
-route.get('/:contactId', getContactById);
-route.delete('/:contactId', removeContact);
-route.put('/:contactId', updateContact);
-route.patch('/:contactId/favorite', updateStatusContact)
+
+route.get('/', authenticate, getAll);
+route.post('/', authenticate, addContact);
+route.get('/:contactId', authenticate, getContactById);
+route.delete('/:contactId', authenticate, removeContact);
+route.put('/:contactId', authenticate, updateContact);
+route.patch('/:contactId/favorite', authenticate, updateStatusContact)
 
 module.exports = route;
