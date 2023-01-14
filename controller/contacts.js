@@ -4,22 +4,14 @@ const { schemaCreateContact, schemaUpdateContact, schemaUpdateStatusContact } = 
 
 const getAll = async (req, res) => {
     const { _id: owner } = req.user;
-    const { page = 1, limit = 10, favorite } = req.query;
+    const { page = 1, limit = 20, favorite } = req.query;
     const skip = (page - 1) * limit;
 
-    let contactList = [];
-
-    if (favorite) {
-        contactList = await Contact.find({ owner }, "-createdAt -updatedAt",
-            { skip, limit, }
-        ).where('favorite').equals(favorite).populate("owner", "email")
-
-    }
-    else {
-        contactList = await Contact.find({ owner }, "-createdAt -updatedAt",
-            { skip, limit, }
-        ).populate("owner", "email")
-    }
+    const contactList = await Contact.find(
+        favorite ? { owner, favorite } : { owner },
+        "-createdAt -updatedAt",
+        { skip, limit }
+    ).populate("owner", "email subscription");
     res.json(contactList)
 }
 
