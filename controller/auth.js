@@ -1,5 +1,9 @@
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const gravatar = require("gravatar")
+const fs = require("fs/promises");
+const path = require("path");
+// const Jimp = require('jimp');
 
 const { User } = require("../models/user")
 
@@ -13,14 +17,14 @@ const register = async (req, res) => {
     if (user) {
         throw HttpError(409, "Email in use")
     }
-
+    const avatarURL = gravatar.url(email);
     const hashPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await User.create({ ...req.body, password: hashPassword });
+    const newUser = await User.create({ ...req.body, hashPassword, avatarURL });
 
     res.status(201).json({
         email: newUser.email,
         subscription: newUser.subscription,
+        avatar: newUser.avatarURL,
     })
 }
 
@@ -80,11 +84,37 @@ const updateSubscription = async (req, res) => {
     })
 }
 
+const avatarsDir = path.join(__dirname, '../', 'public', 'avatars')
+const updateAvatar = async (req, res) => {
+    const { _id } = req.user;
+    const { path: tempUpload, filename } = req.file;
+    const newFileName = `${_id}_${filename}`;
+    const resultUpload = path.join(avatarsDir, newFileName);
+    await fs.rename(tempUpload, resultUpload);
+    const avatarURL = path.join("avatars", newFileName);
+    console.log(avatarURL);
+    // Jimp.read(`${avatarURL}`)
+    //     .then(lenna => {
+    //         return lenna
+    //             .resize(256, 256)
+    //             .write(`${newFileName}`); // save
+    //     })
+    //     .catch(err => {
+    //         console.error(err);
+    //     });
+    await User.findByIdAndUpdate(_id, { avatarURL });
+
+    res.json({
+        avatarURL
+    })
+}
+
 
 module.exports = {
     register: ctrlWrapper(register),
     login: ctrlWrapper(login),
     getCurrent: ctrlWrapper(getCurrent),
     logout: ctrlWrapper(logout),
-    updateSubscription: ctrlWrapper(updateSubscription)
+    updateSubscription: ctrlWrapper(updateSubscription),
+    updateAvatar: ctrlWrapper(updateAvatar),
 }
