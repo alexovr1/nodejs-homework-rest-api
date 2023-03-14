@@ -4,6 +4,8 @@ const cors = require('cors');
 // const multer = require('multer');
 // const path = require('path');
 // const fs = require('fs/promises');
+const swaggerUi = require("swagger-ui-express");
+const swaggerFile = require("./swagger_output.json");
 require('dotenv').config();
 
 const authRouter = require("./routes/api/auth")
@@ -20,6 +22,7 @@ app.use(express.json())
 
 app.use("/api/users", authRouter)
 app.use('/api/contacts', contactsRouter)
+app.use("/api-doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Not found' })
